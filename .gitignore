@@ -1,0 +1,12 @@
+
+data/
+
+*.pyc
+
+shelve\.db\.dat
+
+shelve\.db\.dir
+
+shelve\.db\.bak
+
+file_list\.txt
