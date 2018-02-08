@@ -3,7 +3,7 @@ import os
 import random
 import telebot
 import time
-
+from crontab import CronTab
 
 shelve_name = 'shelve.db'
 token = 'XXX:XXX'
@@ -28,10 +28,19 @@ def handle_start_help(message):
     if not os.path.exists('./file_list.txt'):
         start()
     bot.reply_to(message, 'Hi, sexy! We are ready to start!')
-    while True:
-        #send files every 6 hours
-        time.sleep(21600)
-        send_files(1)
+
+    cron = CronTab(user='gito')
+    job_1 = cron.new(command='python3 ./send.py')
+    job_2 = cron.new(command='python3 ./send.py')
+    job_3 = cron.new(command='python3 ./send.py')
+    job_4 = cron.new(command='python3 ./send.py')
+
+    job_1.setall('0 08 * * *')
+    job_2.setall('0 13 * * *')
+    job_3.setall('0 19 * * *')
+    job_4.setall('0 23 * * *')
+    cron.write()
+    
 
 @bot.message_handler(commands=['update'])
 def handle_update(message):
