@@ -29,9 +29,9 @@ def handle_start_help(message):
         start()
     bot.reply_to(message, 'Hi, sexy! We are ready to start!')
     while True:
-        send_files(2)
-        #send files every 8 hours
-        time.sleep(10800)
+        #send files every 6 hours
+        time.sleep(21600)
+        send_files(1)
 
 @bot.message_handler(commands=['update'])
 def handle_update(message):
@@ -45,6 +45,14 @@ def handle_update(message):
     check_update(os.listdir('./data'))
     bot.reply_to(message, 'Done, sweetie!')
 
+@bot.message_handler(commands=['send_one'])
+def handle_send(message):
+    """
+    Send one file
+    """
+    send_files(1)
+    bot.reply_to(message, 'Done, honney!')
+
 @bot.message_handler(commands=['remain'])
 def handle_remain(message):
     """
@@ -56,7 +64,9 @@ def handle_remain(message):
     """
     with open('./file_list.txt', 'r') as lst:
         count = len([l.strip() for l in lst])
-    bot.reply_to(message, str(count) + ' files remain')
+    with shelve.open(shelve_name) as storage:
+        count2 = len(storage)
+    bot.reply_to(message, str(count) + ' files and ' + str(count2) + 'remain')
 
 
 def check_update(new_list):
@@ -107,14 +117,15 @@ def send_files(n):
         chosen = keys[:n]
         for item in chosen:
             f = './data/' + storage[item]
+            date = time.ctime(os.path.getmtime(f))
             frmt = f[(f.rfind('.') + 1):]
             if frmt == 'gif':
                 with open(f, 'rb') as data:
-                    bot.send_document(chat_id, data)
+                    bot.send_document(chat_id, data, str(date))
                 del storage[item]
             elif frmt == 'jpg' or frmt == 'png':
                 with open(f, 'rb') as data:
-                    bot.send_photo(chat_id, data)
+                    bot.send_photo(chat_id, data, str(date))
                 del storage[item]
             else:
                 #TODO:add more types
