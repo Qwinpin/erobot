@@ -3,6 +3,7 @@ from config import *
 log = Log()
 bot = telebot.TeleBot(token)
 
+
 def start():
     """
     Create all config and storage files
@@ -13,10 +14,11 @@ def start():
         for fl in init_list:
             storage[str(count)] = fl
             count += 1
-    
+
     with open('./file_list.txt', 'w') as f:
         for fl in init_list:
             f.write(fl + '\n')
+
 
 def check_update(new_list):
     """
@@ -37,6 +39,7 @@ def check_update(new_list):
     with open('./file_list.txt', 'a') as old_desc:
         for fl in new_files:
             old_desc.write(fl + '\n')
+
 
 def send_files(n):
     """

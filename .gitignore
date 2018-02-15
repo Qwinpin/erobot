@@ -10,3 +10,5 @@ shelve\.db\.dir
 shelve\.db\.bak
 
 file_list\.txt
+
+\.vscode/settings\.json

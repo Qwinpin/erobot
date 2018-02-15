@@ -5,6 +5,7 @@ from handlers import send_files, start, check_update
 log = Log()
 bot = telebot.AsyncTeleBot(token)
 
+
 @bot.message_handler(commands=['start'])
 def handle_start_help(message):
     """
@@ -22,7 +23,8 @@ def handle_start_help(message):
     job.setall('0 08,13,19,23 * * *')
     cron.write()
     log.information('New schedule was created')
-    
+
+
 @bot.message_handler(commands=['update'])
 def handle_update(message):
     """
@@ -35,6 +37,7 @@ def handle_update(message):
     check_update(os.listdir('./data'))
     bot.reply_to(message, 'Done, sweetie!')
 
+
 @bot.message_handler(commands=['send_one'])
 def handle_send(message):
     """
@@ -42,6 +45,7 @@ def handle_send(message):
     """
     send_files(1)
     bot.reply_to(message, 'Done, honney!')
+
 
 @bot.message_handler(commands=['remain'])
 def handle_remain(message):
