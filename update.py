@@ -1,9 +1,14 @@
-from config import *
+import os
+import shelve
+# external
 from crontab import CronTab
+import telebot
+# project
+import config
 from handlers import send_files, start, check_update
+from settings import logger
 
-log = Log()
-bot = telebot.AsyncTeleBot(token)
+bot = telebot.AsyncTeleBot(config.TOKEN)
 
 
 @bot.message_handler(commands=['start'])
@@ -22,7 +27,7 @@ def handle_start_help(message):
     job = cron.new(command='/usr/bin/python3 /home/gito/github/erobot/send.py')
     job.setall('0 08,13,19,23 * * *')
     cron.write()
-    log.information('New schedule was created')
+    logger.info('New schedule was created')
 
 
 @bot.message_handler(commands=['update'])
@@ -52,12 +57,12 @@ def handle_remain(message):
     """
     Remain command handler
     Return the number of remaining files
-    
+
     Args:
         message (obj): response from telegram server
     """
     with open('./file_list.txt', 'r') as lst:
         count = len([l.strip() for l in lst])
-    with shelve.open(shelve_name) as storage:
+    with shelve.open(config.SHELVE_NAME) as storage:
         count2 = len(storage)
     bot.reply_to(message, str(count) + ' files and ' + str(count2) + 'remain')
