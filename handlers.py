@@ -1,7 +1,11 @@
-from config import *
-
-log = Log()
-bot = telebot.TeleBot(token)
+# built-in
+import shelve
+import os
+import random
+import time
+# project
+import config
+from settings import bot, logger
 
 
 def start():
@@ -10,7 +14,7 @@ def start():
     """
     init_list = os.listdir('./data')
     count = 0
-    with shelve.open(shelve_name) as storage:
+    with shelve.open(config.SHELVE_NAME) as storage:
         for fl in init_list:
             storage[str(count)] = fl
             count += 1
@@ -28,10 +32,10 @@ def check_update(new_list):
     """
     with open('./file_list.txt', 'r') as old_desc:
         old_list = [l.strip() for l in old_desc]
-        #comparing states
+        # compare states
         new_files = list(set(new_list) - set(old_list))
         if new_files:
-            with shelve.open(shelve_name) as storage:
+            with shelve.open(config.SHELVE_NAME) as storage:
                 count = len(old_list)
                 for fl in new_files:
                     storage[str(count)] = fl
@@ -48,7 +52,7 @@ def send_files(n):
     Args:
         n (int): number of files to send
     """
-    with shelve.open(shelve_name) as storage:
+    with shelve.open(config.SHELVE_NAME) as storage:
         keys = [x for x in storage.keys()]
         random.shuffle(keys)
         chosen = keys[:n]
@@ -59,19 +63,21 @@ def send_files(n):
             if frmt == 'gif':
                 with open(f, 'rb') as data:
                     try:
-                        bot.send_document(chat_id, data, caption=str(date))
+                        bot.send_document(config.CHAT_ID, data, caption=str(date))
                     except:
-                        log.error('Photo send error' + data)
+                        # data is binary
+                        logger.error('Photo send error' + repr(data))
                     else:
                         del storage[item]
             elif frmt == 'jpg' or frmt == 'png':
                 with open(f, 'rb') as data:
                     try:
-                        bot.send_photo(chat_id, data, caption=str(date))
+                        bot.send_photo(config.CHAT_ID, data, caption=str(date))
                     except:
-                        log.error('Photo send error' + data)
+                        # data is binary
+                        logger.error('Photo send error' + repr(data))
                     else:
                         del storage[item]
             else:
-                #TODO:add more types
-                pass
+                # TODO: add more types
+                ...
