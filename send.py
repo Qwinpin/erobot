@@ -28,7 +28,7 @@ def send_files(n):
                     try:
                         bot.send_document(config.CHAT_ID, data, caption=str(date))
                     except:
-                        logger.error('Photo send error' + repr(data))
+                        logger.error('Photo send error: ' + f)
                     else:
                         del storage[item]
             elif frmt == 'jpg' or frmt == 'png':
@@ -36,9 +36,9 @@ def send_files(n):
                     try:
                         bot.send_photo(config.CHAT_ID, data, caption=str(date))
                     except:
-                        logger.error('Photo send error' + repr(data))
+                        logger.error('Photo send error: ' + f)
                     else:
                         del storage[item]
             else:
                 # TODO: add more types
-                pass
+                ...

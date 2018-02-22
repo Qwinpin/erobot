@@ -5,7 +5,8 @@ from crontab import CronTab
 import telebot
 # project
 import config
-from handlers import send_files, start, check_update
+from handlers import start, check_update
+from send import send_files
 from settings import logger
 
 bot = telebot.AsyncTeleBot(config.TOKEN)
@@ -66,3 +67,7 @@ def handle_remain(message):
     with shelve.open(config.SHELVE_NAME) as storage:
         count2 = len(storage)
     bot.reply_to(message, str(count) + ' files and ' + str(count2) + 'remain')
+
+
+if __name__ == '__main__':
+    bot.polling(none_stop=True)
