@@ -1,6 +1,11 @@
-from config import *
-
-bot = telebot.TeleBot(token)
+# built-in
+import random
+import time
+import os
+import shelve
+# project
+import config
+from settings import bot, logger
 
 
 def send_files(n):
@@ -10,8 +15,7 @@ def send_files(n):
     Args:
         n (int): number of files to send
     """
-    log = Log()
-    with shelve.open('github/erobot/' + shelve_name) as storage:
+    with shelve.open('github/erobot/' + config.SHELVE_NAME) as storage:
         keys = [x for x in storage.keys()]
         random.shuffle(keys)
         chosen = keys[:n]
@@ -22,19 +26,19 @@ def send_files(n):
             if frmt == 'gif':
                 with open(f, 'rb') as data:
                     try:
-                        bot.send_document(chat_id, data, caption=str(date))
+                        bot.send_document(config.CHAT_ID, data, caption=str(date))
                     except:
-                        log.error('Photo send error' + data)
+                        logger.error('Photo send error' + repr(data))
                     else:
                         del storage[item]
             elif frmt == 'jpg' or frmt == 'png':
                 with open(f, 'rb') as data:
                     try:
-                        bot.send_photo(chat_id, data, caption=str(date))
+                        bot.send_photo(config.CHAT_ID, data, caption=str(date))
                     except:
-                        log.error('Photo send error' + data)
+                        logger.error('Photo send error' + repr(data))
                     else:
                         del storage[item]
             else:
-                #TODO:add more types
+                # TODO: add more types
                 pass
