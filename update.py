@@ -5,9 +5,9 @@ from crontab import CronTab
 import telebot
 # project
 import config
-from handlers import start, check_update
-from send import send_files
+from core import start, check_update, send_files
 from settings import logger
+
 
 bot = telebot.AsyncTeleBot(config.TOKEN)
 
