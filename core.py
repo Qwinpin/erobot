@@ -1,27 +1,31 @@
 # built-in
-import shelve
 import os
 import random
+import pickle
 import time
 # project
 import config
 from settings import bot, logger
 
 
+def get_files():
+    files = config.IMAGES_PATH.iterdir()
+    return [f for f in files if f[-4:] not in ('.gif', '.png', '.jpg')]
+
+
 def start():
     """
     Create all config and storage files
     """
-    init_list = os.listdir('./data')
-    count = 0
-    with shelve.open(config.SHELVE_NAME) as storage:
-        for fl in init_list:
-            storage[str(count)] = fl
-            count += 1
-
-    with open('./file_list.txt', 'w') as f:
-        for fl in init_list:
-            f.write(fl + '\n')
+    data = {
+        'queue': get_files(),
+        'sended': [],
+    }
+    # shuffle
+    random.shuffle(data['queue'])
+    # write
+    with open(config.STORAGE_FILE, 'wb') as f:
+        pickle.dump(data, f)
 
 
 def check_update(new_list):
@@ -30,52 +34,44 @@ def check_update(new_list):
     Args:
         new_list (list): list of files in the dir
     """
-    with open('./file_list.txt', 'r') as old_desc:
-        old_list = [l.strip() for l in old_desc]
-        # compare states
-        new_files = list(set(new_list) - set(old_list))
-        if new_files:
-            with shelve.open(config.SHELVE_NAME) as storage:
-                count = len(old_list)
-                for fl in new_files:
-                    storage[str(count)] = fl
-                    count += 1
-    with open('./file_list.txt', 'a') as old_desc:
-        for fl in new_files:
-            old_desc.write(fl + '\n')
+    # read
+    with open(config.STORAGE_FILE, 'rb') as f:
+        data = pickle.load(f)
+    # compare
+    files = get_files()
+    diff_files = list(set(files) ^ set(data['sended']))
+    data['queue'] = list(set(files) - set(data['sended']))
+    # shuffle
+    random.shuffle(data['queue'])
+    # write
+    with open(config.STORAGE_FILE, 'wb') as f:
+        pickle.dump(data, f)
+    return diff_files
 
 
-def send_files(n):
+def send_files(count):
     """
     Get files description from key-value storage, send to chat
 
     Args:
         n (int): number of files to send
     """
-    with shelve.open('github/erobot/' + config.SHELVE_NAME) as storage:
-        keys = [x for x in storage.keys()]
-        random.shuffle(keys)
-        chosen = keys[:n]
-        for item in chosen:
-            f = 'github/erobot/data/' + storage[item]
-            date = time.ctime(os.path.getmtime(f))
-            frmt = f[(f.rfind('.') + 1):]
-            if frmt == 'gif':
-                with open(f, 'rb') as data:
-                    try:
-                        bot.send_document(config.CHAT_ID, data, caption=str(date))
-                    except:
-                        logger.error('Photo send error: ' + f)
-                    else:
-                        del storage[item]
-            elif frmt == 'jpg' or frmt == 'png':
-                with open(f, 'rb') as data:
-                    try:
-                        bot.send_photo(config.CHAT_ID, data, caption=str(date))
-                    except:
-                        logger.error('Photo send error: ' + f)
-                    else:
-                        del storage[item]
+    with open(config.STORAGE_FILE, 'rb') as f:
+        data = pickle.load(f)
+
+    for _i in range(count):
+        fname = data['queue'].pop()
+        fpath = config.IMAGES_PATH / fname
+        date = time.ctime(os.path.getmtime(str(fpath)))
+        with fpath.open('rb') as data:
+            if fname.endswith('.gif'):
+                sender = bot.send_document
+            else:
+                sender = bot.send_photo
+            try:
+                sender(config.CHAT_ID, data, caption=str(date))
+            except Exception as e:
+                logger.exception('Photo send error: ' + fname)
             else:
                 # TODO: add more types
                 ...
