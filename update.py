@@ -24,6 +24,12 @@ def handle_update(message):
         updated = len(updated)
     bot.reply_to(message, 'Updated files: {}.'.format(updated))
 
+@bot.message_handler(commands=['flush'])
+def handle_flush(message):
+    with context() as channels:
+        updated = channels.flush()
+    bot.reply_to(message, 'States is flushed')
+
 
 @bot.message_handler(commands=['send'])
 def handle_send(message):
@@ -37,12 +43,12 @@ def handle_remain(message):
     stat = []
     with context() as channels:
         for channel in channels.channels:
-            stat.append('\n'.join(
+            stat.append('\n'.join([
                 '# {}'.format(channel.rule.alias),
-                'queue: {}'.format(channel.state.queue),
-                'sended: {}'.format(channel.state.sended),
-                'failed: {}'.format(channel.state.failed),
-            ))
+                'queue: {}'.format(len(channel.state.queue)),
+                'sended: {}'.format(len(channel.state.sended)),
+                'failed: {}'.format(len(channel.state.failed)),
+            ]))
     bot.reply_to(message, '\n\n'.join(stat))
 
 

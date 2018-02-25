@@ -45,7 +45,7 @@ class Channel:
     def update(self):
         files = self.get_all_files()
         # find diff (deleted and added files)
-        diff_files = list(set(files) ^ set(self.state.queue))
+        diff_files = list((set(files) ^ set(self.state.queue)) - set(self.state.sended))
         # get new queue
         queue = list(set(files) - set(self.state.sended))
         # shuffle queue
@@ -115,6 +115,7 @@ class Channel:
                     ext=os.path.splitext(str(fpath))[-1],
                     caption=time.strftime('%d.%m.%Y', time.gmtime(date)),
                 )
+            self.state.sended.append(fpath)
             self.state.failed.pop()
 
 
