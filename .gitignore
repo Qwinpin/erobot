@@ -1,7 +1,10 @@
 data/
+logs/
+
 *.pyc
-shelve.db*
-file_list.txt
-.vscode
+
+storage.bin
 config.py
+
+.vscode
 

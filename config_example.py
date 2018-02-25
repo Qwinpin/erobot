@@ -1,10 +1,24 @@
+from collections import namedtuple
+import os
 from pathlib import Path
+
+
+Rule = namedtuple('Rule', ['alias', 'chat_id', 'log', 'schedule', 'path'])
 
 
 TOKEN = 'XXX:XXXX'
 CHAT_ID = -0
 
 STORAGE_FILE = 'storage.bin'
-LOG_FILE = 'bot.log'
+LOG_FILE = 'logs/main.log'
+PROJECT_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 
-IMAGES_PATH = Path('data')
+RULES = (
+    Rule(
+        alias='ChannelName',
+        chat_id=-123,
+        log='logs/channelname.log',
+        schedule='0 08,13,19,23 * * *',
+        path=Path('data'),
+    ),
+)
