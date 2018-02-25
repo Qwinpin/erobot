@@ -1,5 +1,6 @@
 # built-in
 from collections import namedtuple
+from contextlib import contextmanager
 import os
 import os.path
 import pickle
@@ -102,8 +103,9 @@ class Channel:
 
     def send(self, count=1):
         for _i in range(count):
-            self.proccessed_file = self.state.queue.pop()
-            fpath = self.rule.path / self.proccessed_file
+            fname = self.state.queue.pop()
+            self.state.failed.append(fname)
+            fpath = self.rule.path / fname
             date = fpath.stat().st_mtime
 
             with fpath.open('rb') as file_descriptor:
@@ -112,6 +114,7 @@ class Channel:
                     ext=os.path.splitext(fpath)[-1],
                     caption=str(date),
                 )
+            self.state.failed.pop()
 
 
 class ChannelsManager:
@@ -173,3 +176,13 @@ class ChannelsManager:
             self.read()
         for channel in self.channels:
             channel.send()
+
+
+@contextmanager
+def context():
+    manager = ChannelsManager()
+    manager.read()
+    try:
+        yield manager
+    finally:
+        manager.write()
