@@ -10,7 +10,7 @@ import time
 from crontab import CronTab
 # project
 import config
-from settings import bot, logger
+from settings import bot
 
 
 State = namedtuple('State', ['queue', 'sended', 'failed'])
@@ -57,7 +57,7 @@ class Channel:
     def create_cron_task(self):
         cron = CronTab()
         job = cron.new(command='python3 {} "{}"'.format(
-            PROJECT_PATH / 'send.py',
+            config.PROJECT_PATH / 'send.py',
             self.rule.alias,
         ))
         job.setall('0 08,13,19,23 * * *')
@@ -103,16 +103,17 @@ class Channel:
 
     def send(self, count=1):
         for _i in range(count):
-            fname = self.state.queue.pop()
-            self.state.failed.append(fname)
-            fpath = self.rule.path / fname
+            if not self.state.queue:
+                return
+            fpath = self.state.queue.pop()
+            self.state.failed.append(fpath)
             date = fpath.stat().st_mtime
 
             with fpath.open('rb') as file_descriptor:
                 self._send_file(
-                    data=file_descriptor,
-                    ext=os.path.splitext(fpath)[-1],
-                    caption=str(date),
+                    file_descriptor=file_descriptor,
+                    ext=os.path.splitext(str(fpath))[-1],
+                    caption=time.strftime('%d.%m.%Y', time.gmtime(date)),
                 )
             self.state.failed.pop()
 
@@ -149,7 +150,7 @@ class ChannelsManager:
         self.channels = []
         for rule, state in zip(self.rules, states):
             channel = Channel(rule, state)
-            channels.append(channel)
+            self.channels.append(channel)
         return self.channels
 
     def write(self):

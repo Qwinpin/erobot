@@ -1,9 +1,8 @@
 # external
 import telebot
 # project
+import config
 from core import context
-from settings import logger
-
 
 bot = telebot.AsyncTeleBot(config.TOKEN)
 
@@ -37,8 +36,8 @@ def handle_send(message):
 def handle_remain(message):
     stat = []
     with context() as channels:
-        for channel in schannels.schannels:
-            all_stat.append('\n'.join(
+        for channel in channels.channels:
+            stat.append('\n'.join(
                 '# {}'.format(channel.rule.alias),
                 'queue: {}'.format(channel.state.queue),
                 'sended: {}'.format(channel.state.sended),
