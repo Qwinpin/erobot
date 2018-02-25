@@ -19,7 +19,7 @@ class Channel:
     def __init__(self, rule, state=None):
         self.rule = rule
         self.state = state
-    
+
     def get_all_files(self):
         # make dir if not exists
         if not self.rule.path.is_dir():
@@ -40,7 +40,7 @@ class Channel:
         )
         # return new state
         return self.state
-    
+
     def update(self):
         files = self.get_all_files()
         # find diff (deleted and added files)
@@ -99,7 +99,7 @@ class Channel:
                 data=file_descriptor,
                 caption=caption,
             )
-    
+
     def send(self, count=1):
         for _i in range(count):
             self.proccessed_file = self.state.queue.pop()
@@ -157,8 +157,10 @@ class ChannelsManager:
     def update(self):
         if not self.channels:
             self.read()
+        updated = []
         for channel in self.channels:
-            channel.update()
+            updated.extend(channel.update())
+        return updated
 
     def create_cron_tasks(self):
         if not self.channels:
@@ -166,7 +168,8 @@ class ChannelsManager:
         for channel in self.channels:
             channel.create_cron_task()
 
-
-class BotManager:
-    pass
-            
+    def send(self):
+        if not self.channels:
+            self.read()
+        for channel in self.channels:
+            channel.send()

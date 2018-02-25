@@ -11,62 +11,42 @@ from settings import logger
 
 bot = telebot.AsyncTeleBot(config.TOKEN)
 
+channels = ChannelsManager()
 
-@bot.message_handler(commands=['start'])
-def handle_start_help(message):
-    """
-    Start function - handle start command
 
-    Args:
-        message (obj): response from telegram server
-    """
-    if not os.path.exists('./file_list.txt'):
-        start()
-    bot.reply_to(message, 'Hi, sexy! We are ready to start!')
-
-    cron = CronTab(user='gito')
-    job = cron.new(command='/usr/bin/python3 /home/gito/github/erobot/send.py')
-    job.setall('0 08,13,19,23 * * *')
-    cron.write()
-    logger.info('New schedule was created')
+@bot.message_handler(commands=['cron'])
+def handle_cron(message):
+    channels.create_cron_tasks()
+    bot.reply_to(message, 'Cron tasks created.')
 
 
 @bot.message_handler(commands=['update'])
 def handle_update(message):
-    """
-    Update command handler
-    Update function - add new files to key-value storage
-
-    Args:
-        message (obj): response from telegram server
-    """
-    check_update(os.listdir('./data'))
-    bot.reply_to(message, 'Done, sweetie!')
+    updated = channels.update()
+    if len(updated) > 4:
+        updated = ', '.join(updated)
+    else:
+        updated = len(updated)
+    bot.reply_to(message, 'Updated files: {}.'.format(updated))
 
 
-@bot.message_handler(commands=['send_one'])
+@bot.message_handler(commands=['send'])
 def handle_send(message):
-    """
-    Send one file
-    """
-    send_files(1)
-    bot.reply_to(message, 'Done, honney!')
+    channels.send()
+    bot.reply_to(message, 'Files sended in all channels')
 
 
-@bot.message_handler(commands=['remain'])
+@bot.message_handler(commands=['stat'])
 def handle_remain(message):
-    """
-    Remain command handler
-    Return the number of remaining files
-
-    Args:
-        message (obj): response from telegram server
-    """
-    with open('./file_list.txt', 'r') as lst:
-        count = len([l.strip() for l in lst])
-    with shelve.open(config.SHELVE_NAME) as storage:
-        count2 = len(storage)
-    bot.reply_to(message, str(count) + ' files and ' + str(count2) + 'remain')
+    stat = []
+    for channel in schannels.schannels:
+        all_stat.append('\n'.join(
+            '# {}'.format(channel.rule.alias),
+            'queue: {}'.format(channel.state.queue),
+            'sended: {}'.format(channel.state.sended),
+            'failed: {}'.format(channel.state.failed),
+        ))
+    bot.reply_to(message, '\n\n'.join(stat))
 
 
 if __name__ == '__main__':
