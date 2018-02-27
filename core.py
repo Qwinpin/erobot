@@ -69,6 +69,11 @@ class Channel:
                 photo=file_descriptor,
                 caption=caption,
             )
+        elif ext == '.txt':
+            return bot.send_message(
+                chat_id=self.rule.chat_id,
+                text=file_descriptor.read().decode(),
+            )
         elif ext == '.md':
             return bot.send_message(
                 chat_id=self.rule.chat_id,

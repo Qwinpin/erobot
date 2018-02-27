@@ -2,6 +2,7 @@
 
 Telegram bot for sending files to chat or channel by cron.
 
+
 ## Features
 
 * Many file formats
@@ -12,7 +13,6 @@ Telegram bot for sending files to chat or channel by cron.
 * Statistics
 * More than one channels and chats
 
-
 TODO:
 
 * Permissions
@@ -22,6 +22,16 @@ TODO:
 * docstrings
 
 
+## Supported file formats
+
+* Plain text: `.txt`
+* Markdown: `.md`
+* HTML: `.html`
+* Image: `.png`, `.jpg`
+* Music: `.mp3`, `.ogg`
+* Any other file format will be sent as document.
+
+
 ## Installation
 
 1. Clone or download project
@@ -29,6 +39,7 @@ TODO:
 3. Edit config.py
 4. Place your files to `path`.
 5. add cron tasks.
+
 
 ## Usage
 
