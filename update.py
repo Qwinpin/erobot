@@ -4,6 +4,7 @@ import telebot
 import config
 from core import context
 
+
 bot = telebot.AsyncTeleBot(config.TOKEN)
 
 
@@ -24,10 +25,11 @@ def handle_update(message):
         updated = len(updated)
     bot.reply_to(message, 'Updated files: {}.'.format(updated))
 
+
 @bot.message_handler(commands=['flush'])
 def handle_flush(message):
     with context() as channels:
-        updated = channels.flush()
+        channels.flush()
     bot.reply_to(message, 'States is flushed')
 
 

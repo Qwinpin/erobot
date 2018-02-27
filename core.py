@@ -1,17 +1,16 @@
 # built-in
-from collections import namedtuple
-from contextlib import contextmanager
 import os
 import os.path
 import pickle
 import random
 import time
-# external
-from crontab import CronTab
+from collections import namedtuple
+from contextlib import contextmanager
+
 # project
 import config
+from crontab import CronTab
 from settings import bot
-
 
 State = namedtuple('State', ['queue', 'sended', 'failed'])
 
