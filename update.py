@@ -1,63 +1,58 @@
-from config import *
-from crontab import CronTab
-from handlers import send_files, start, check_update
+# external
+import telebot
+# project
+import config
+from core import context
 
-log = Log()
-bot = telebot.AsyncTeleBot(token)
+
+bot = telebot.AsyncTeleBot(config.TOKEN)
 
 
-@bot.message_handler(commands=['start'])
-def handle_start_help(message):
-    """
-    Start function - handle start command
-
-    Args:
-        message (obj): response from telegram server
-    """
-    if not os.path.exists('./file_list.txt'):
-        start()
-    bot.reply_to(message, 'Hi, sexy! We are ready to start!')
-
-    cron = CronTab(user='gito')
-    job = cron.new(command='/usr/bin/python3 /home/gito/github/erobot/send.py')
-    job.setall('0 08,13,19,23 * * *')
-    cron.write()
-    log.information('New schedule was created')
+@bot.message_handler(commands=['cron'])
+def handle_cron(message):
+    with context() as channels:
+        channels.create_cron_tasks()
+    bot.reply_to(message, 'Cron tasks created.')
 
 
 @bot.message_handler(commands=['update'])
 def handle_update(message):
-    """
-    Update command handler
-    Update function - add new files to key-value storage
-
-    Args:
-        message (obj): response from telegram server
-    """
-    check_update(os.listdir('./data'))
-    bot.reply_to(message, 'Done, sweetie!')
+    with context() as channels:
+        updated = channels.update()
+    if len(updated) > 4:
+        updated = ', '.join(updated)
+    else:
+        updated = len(updated)
+    bot.reply_to(message, 'Updated files: {}.'.format(updated))
 
 
-@bot.message_handler(commands=['send_one'])
+@bot.message_handler(commands=['flush'])
+def handle_flush(message):
+    with context() as channels:
+        channels.flush()
+    bot.reply_to(message, 'States is flushed')
+
+
+@bot.message_handler(commands=['send'])
 def handle_send(message):
-    """
-    Send one file
-    """
-    send_files(1)
-    bot.reply_to(message, 'Done, honney!')
+    with context() as channels:
+        channels.send()
+    bot.reply_to(message, 'Files sended in all channels')
 
 
-@bot.message_handler(commands=['remain'])
+@bot.message_handler(commands=['stat'])
 def handle_remain(message):
-    """
-    Remain command handler
-    Return the number of remaining files
-    
-    Args:
-        message (obj): response from telegram server
-    """
-    with open('./file_list.txt', 'r') as lst:
-        count = len([l.strip() for l in lst])
-    with shelve.open(shelve_name) as storage:
-        count2 = len(storage)
-    bot.reply_to(message, str(count) + ' files and ' + str(count2) + 'remain')
+    stat = []
+    with context() as channels:
+        for channel in channels.channels:
+            stat.append('\n'.join([
+                '# {}'.format(channel.rule.alias),
+                'queue: {}'.format(len(channel.state.queue)),
+                'sended: {}'.format(len(channel.state.sended)),
+                'failed: {}'.format(len(channel.state.failed)),
+            ]))
+    bot.reply_to(message, '\n\n'.join(stat))
+
+
+if __name__ == '__main__':
+    bot.polling(none_stop=True)

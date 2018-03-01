@@ -1,14 +1,10 @@
-
 data/
+logs/
 
 *.pyc
 
-shelve\.db\.dat
+storage.bin
+config.py
 
-shelve\.db\.dir
+.vscode
 
-shelve\.db\.bak
-
-file_list\.txt
-
-\.vscode/settings\.json
